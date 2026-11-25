@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>Student Registration</title>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Registration</h1>
+
+    <div class="form-box">
+
+        <h2>Enter Student Details</h2>
+
+        <form th:action="@{/save}"
+              th:object="${student}"
+              method="post">
+
+            <label>Student Name</label>
+
+            <input type="text"
+                   th:field="*{name}"
+                   placeholder="Enter student name"
+                   required
+                   minlength="2"
+                   maxlength="50"
+                   pattern="[A-Za-z][A-Za-z .'\-]*"
+                   title="Enter 2 to 50 letters, spaces, dots, apostrophes or hyphens">
+
+            <p class="error"
+               th:if="${#fields.hasErrors('name')}"
+               th:errors="*{name}">
+            </p>
+
+            <label>Email Address</label>
+
+            <input type="email"
+                   th:field="*{email}"
+                   placeholder="Enter email"
+                   required
+                   maxlength="254"
+                   id="email"
+                   title="Enter a valid email address">
+
+            <p class="error" id="duplicate-email-error" hidden>
+                This email is already registered
+            </p>
+
+            <p class="error"
+               th:if="${#fields.hasErrors('email')}"
+               th:errors="*{email}">
+            </p>
+
+            <label>Select Course</label>
+
+            <select th:field="*{course}" required>
+
+                <option value="">Select Course</option>
+
+                <option value="Java">Java</option>
+
+                <option value="Spring Boot">Spring Boot</option>
+
+                <option value="Python">Python</option>
+
+                <option value="Angular">Angular</option>
+
+            </select>
+
+            <p class="error"
+               th:if="${#fields.hasErrors('course')}"
+               th:errors="*{course}">
+            </p>
+
+            <button type="submit">
+                Register Student
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="table-box">
+
+        <h2>Registered Students</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Course</th>
+                    <th>Action</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr th:each="s : ${students}">
+
+                    <td th:text="${s.id}"></td>
+
+                    <td th:text="${s.name}"></td>
+
+                    <td th:text="${s.email}"></td>
+
+                    <td th:text="${s.course}"></td>
+
+                    <td>
+                        <a th:href="@{/delete/{id}(id=${s.id})}"
+                           onclick="return confirm('Delete this student?')">
+                            Delete
+                        </a>
+                    </td>
+
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(students)}">
+
+                    <td colspan="5">
+                        No student records found
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script th:inline="javascript">
+    const emailInput = document.getElementById("email");
+    const duplicateEmailError = document.getElementById("duplicate-email-error");
+
+    function normalizeEmail(email) {
+        return email.trim().toLowerCase();
+    }
+
+    function emailAlreadyExists() {
+        if (!emailInput) {
+            return false;
+        }
+
+        const enteredEmail = normalizeEmail(emailInput.value);
+        if (!enteredEmail) {
+            return false;
+        }
+
+        return Array.from(document.querySelectorAll("tbody tr td:nth-child(3)"))
+            .some(cell => normalizeEmail(cell.textContent) === enteredEmail);
+    }
+
+    function updateDuplicateEmailState() {
+        const duplicate = emailAlreadyExists();
+        duplicateEmailError.hidden = !duplicate;
+        emailInput.setCustomValidity(
+            duplicate ? "This email is already registered" : ""
+        );
+    }
+
+    emailInput.addEventListener("input", updateDuplicateEmailState);
+    updateDuplicateEmailState();
+</script>
+
+</body>
+</html>
