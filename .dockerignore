@@ -1,0 +1,5 @@
+.git
+.github
+.mvn
+target/*
+!target/management-0.0.1-SNAPSHOT.jar
